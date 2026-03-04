@@ -33,11 +33,16 @@ jobs:
           title: Nightly Build
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & upload binaries
+      - name: Build binaries
+        run: |
+          cargo build --release -p slipstream-client -p slipstream-server
+
+      - name: Upload binaries
         uses: taiki-e/upload-rust-binary-action@v1
         with:
           ref: refs/tags/${{ env.NIGHTLY_TAG }}
           bin: slipstream-client slipstream-server
           target: x86_64-unknown-linux-gnu
-          tar: all
+          # Must provide an archive name for multiple binaries
+          archive: slipstream-nightly-linux-amd64.tar.gz
           token: ${{ secrets.GITHUB_TOKEN }}
