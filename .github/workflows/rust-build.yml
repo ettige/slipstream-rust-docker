@@ -16,27 +16,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create or update nightly tag
+      - name: Set nightly tag
+        id: nightly_tag
         run: |
+          TAG="v0.0.0-nightly-$(date +'%Y%m%d%H%M')"
+          echo "NIGHTLY_TAG=$TAG" >> $GITHUB_ENV
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git tag -f nightly
-          git push origin nightly --force
+          git tag -f $TAG
+          git push origin $TAG --force
 
       - name: Create or update nightly release
         uses: taiki-e/create-gh-release-action@v1
         with:
-          ref: refs/tags/nightly
+          ref: refs/tags/${{ env.NIGHTLY_TAG }}
           title: Nightly Build
-          # (optional) Path to changelog.
-          # changelog: CHANGELOG.md
-          # (required) GitHub token for creating GitHub Releases.
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build & upload binaries
         uses: taiki-e/upload-rust-binary-action@v1
         with:
-          ref: refs/tags/nightly
+          ref: refs/tags/${{ env.NIGHTLY_TAG }}
           bin: slipstream-client slipstream-server
           target: x86_64-unknown-linux-gnu
           tar: all
